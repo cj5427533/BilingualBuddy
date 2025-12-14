@@ -36,12 +36,12 @@ OCR로 읽은 텍스트(숙제/공지/교과 내용)를 **요약·해설**하고
 ```mermaid
 flowchart LR
   subgraph App[Android App]
-    UI[Compose UI\n(Home/Question/Result)] --> VM[ViewModel]
+    UI[Compose UI<br/>Home/Question/Result] --> VM[ViewModel]
     VM --> Repo[Repository]
     UI --> OCR[ML Kit OCR]
     UI --> TTS[Android TTS]
-    Repo --> AISvc[AIService\n(Mock / OpenAI)]
-    Repo --> Trans[TranslateApi\n(Papago, optional)]
+    Repo --> AISvc[AIService<br/>Mock or OpenAI]
+    Repo --> Trans[TranslateApi<br/>Papago optional]
   end
 
   AISvc -->|HTTPS| OpenAI[OpenAI API]
