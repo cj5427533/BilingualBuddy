@@ -1,239 +1,151 @@
-# 🌍 BilingualBuddy - 다문화가정 자녀를 위한 AI 기반 이중 언어 학습 도우미 플랫폼
+# BilingualBuddy — 다문화/이주배경 학생을 위한 이중언어 학습 도우미(Android)
 
-## 📌 프로젝트 개요
-BilingualBuddy는 외국인 노동자 및 다문화가정의 자녀가 학교 생활(숙제, 알림장, 교과 내용 등)에서 겪는 언어 장벽 문제를 AI 기반 이중 언어 학습 도우미로 해결하고자 하는 플랫폼/앱 서비스입니다.
+OCR로 읽은 텍스트(숙제/공지/교과 내용)를 **요약·해설**하고, 필요 시 **번역/TTS**로 전달하는 Android 앱 MVP입니다. (기본값: **Mock 모드**로 API 키 없이 실행)
 
-### 🎯 문제 정의
-- 국내 다문화가정 자녀 수 약 20만 명 (전체 학생의 4% 이상)
-- 이주배경 학생의 학습 참여 저하 및 교사와의 소통 단절
-- 한국어(KSL) 학급 제공 학교는 1만 2천 개 중 526개뿐
+## 데모
 
-## 💡 서비스 핵심 가치
-우리의 아이디어는 전반적인 학교생활 학습 도우미로, 숙제나 생활 안내 등 종합 지원을 지향합니다. 기존 번역 도구는 음성보다는 텍스트 기반이 많고, 일부는 다국어 쌍방향 지원이 제한적이었습니다. 우리의 서비스는 아이와 음성 대화하면서 필요한 정보를 즉각 다국어로 주고받거나, 학습 이외에 정서적 멘토 역할까지 하는 종합 AI 도우미입니다.
+- **로컬 실행**: 아래 [빠른 시작(Quick Start)](#빠른-시작quick-start) 참고
+- **이미지**
 
-## 🛠️ 기술 스택
+![BilingualBuddy 로고](BilingualBuddy_logo.png)
 
-### Frontend
-- Android Native (Kotlin)
-- Jetpack Compose (UI 프레임워크)
-- Material Design 3
-- Navigation Component
+## 문제 정의(Why) / 목표(Goal)
 
-### Backend
-- OpenAI GPT-4o-mini API (또는 GPT-3.5 Turbo)
-- Papago Translation API (선택사항)
-- Android TTS (Text-to-Speech)
-- ML Kit OCR (한국어 텍스트 인식)
-- Mock AI Service (테스트용)
+- **Why**: 학교 안내/숙제/교과 내용을 이해하는 과정에서 언어 장벽이 생기면 학습 참여와 가정-학교 소통이 끊깁니다.
+- **Goal**: 사진/텍스트 입력 → (1) 모국어 요약 (2) 한국어 설명 (3) 발음 가이드 형태로 결과를 빠르게 제공하고, **API 키가 없어도 UI/흐름을 재현**할 수 있게 합니다.
 
-### 아키텍처
-- MVVM (Model-View-ViewModel) 패턴
-- Repository 패턴
-- Hilt (의존성 주입)
-- Coroutines & Flow (비동기 처리)
+## 주요 기능(Features)
 
-## ✨ 주요 기능
+- **OCR 입력**: 이미지에서 텍스트 추출(ML Kit 한국어 인식)
+- **질문/답변 플로우**: 질문 입력 → 로딩/에러 처리 → 결과(3파트) 표시
+- **AI 응답 포맷**: `[베트남어 요약] / [한국어 설명] / [발음]` 분리 표시(실 API 모드)
+- **MockAIService**: API 키 없이 예시 답변으로 동작(기본값)
+- **번역(선택)**: Papago NMT 연동(키 설정 시)
+- **TTS(선택)**: 결과를 음성으로 읽기(Android TTS)
 
-### 1. 🤖 이중언어 AI 튜터 구조
-- 모국어 질문 → AI가 한국 교과 개념 기반 설명 → 한국어 재설명
-- 이중언어 모드로 아이+부모+교사 연결
+## 기술 스택
 
-### 2. 📱 학교 생활 중심 지원
-#### 가정통신문 자동 번역 및 알림 기능
+- **Frontend(Android)**: Kotlin, Jetpack Compose, Material 3, Navigation Compose
+- **Architecture**: MVVM, Repository, Hilt(DI), Coroutines/Flow
+- **Networking**: OkHttp, org.json
+- **ML/OCR**: ML Kit Text Recognition (Korean)
+- **External APIs(선택)**: OpenAI Chat Completions, Naver Papago NMT
 
-| 기존 서비스                       | BilingualBuddy |
-|-----------------------------------|
-| 부모가 직접 카메라로 찍어야 함    | **앱이 자동으로 번역해서 알려줌** (능동적 알림) |
-| 파일/종이/이미지를 직접 찍거나 업로드해야 함 | 교사가 올린 자료를 **자동 수신 → 번역 → 알림** |
-| 번역만 제공                       | **행사 일정/필수 동의서 등 요약 설명 + 푸시 기능** |
-| 지속적 학습/숙제 추적 기능 없음   | 숙제/공지 히스토리 관리, **AI 질문 기능 등 확장 가능** |
-| 부모가 기술을 알아야 함           | **디지털 문해력 낮은 사용자도 쉽게 사용** |
+## 시스템 구성도(Architecture)
 
-- 교사와의 메시지 자동 번역 메신저
-- 시험 일정, 체험학습, 공지 등 음성 알림 변환 지원
+```mermaid
+flowchart LR
+  subgraph App[Android App]
+    UI[Compose UI\n(Home/Question/Result)] --> VM[ViewModel]
+    VM --> Repo[Repository]
+    UI --> OCR[ML Kit OCR]
+    UI --> TTS[Android TTS]
+    Repo --> AISvc[AIService\n(Mock / OpenAI)]
+    Repo --> Trans[TranslateApi\n(Papago, optional)]
+  end
 
-### 3. 🌐 다국어 & 지역 맞춤 대응
-- 베트남어, 중국어, 우즈벡어, 네팔어 등 상위 5개 국적 우선 대응
-- 지역 다문화가족지원센터, 학교 다문화 담당교사와 연동
-
-### 4. 💝 정서적·문화적 멘토 기능
-- AI 캐릭터가 생활 질문/진로/상담 챗봇 기능 수행
-- 학교 생활이 낯선 아이들에게 심리적 안정 제공
-
-### 5. 🎮 게이미피케이션 기능
-- AI가 아이의 한국어 능력과 모국어 수준 데이터를 축적
-- 부족한 부분을 파악한 뒤, 추가 학습자료나 보충 설명을 게임화 콘텐츠로 제공
-- 학습 동기 부여 시스템
-
-## 🔄 개발 프로세스
-
-### 1. 문제 분석 및 기획
-- 다문화가정 학생들의 실제 학습 장벽 조사
-- 기존 서비스 분석 및 한계점 도출
-
-### 2. 기술 검증
-- OCR, 번역, TTS 등 핵심 기술 테스트
-- API 연동 및 성능 최적화
-
-### 3. 개발 및 테스트
-- MVP 기능 구현
-- 베트남어 사용자 대상 실험 진행
-
-## 🚧 개발 과정의 도전과 해결
-
-1. **API 크레딧 관리**
-   - 문제: OpenAI API 크레딧 초과 및 모델 접근 권한 문제
-   - 해결: Mock 서비스 구성으로 UI 개발 진행, 질문 유형별 맞춤 답변 제공
-
-2. **다국어 지원**
-   - 문제: 베트남어 TTS 정확도 문제
-   - 해결: 한국어 중심 설계로 전환
-
-3. **OCR 성능**
-   - 문제: 초기 OCR 인식률 저하
-   - 해결: ML Kit 한국어 텍스트 인식 도입으로 성능 개선
-
-4. **아키텍처 개선**
-   - 문제: Compose와 View 혼용, 보안 이슈, 에러 처리 부족
-   - 해결: 
-     - Compose로 통일
-     - MVVM + Repository 패턴 도입
-     - Hilt 의존성 주입 적용
-     - API 키를 환경 변수로 이동
-     - 강화된 에러 처리
-
-5. **UI/UX 개선**
-   - 문제: 기본적인 UI로 인한 사용자 경험 저하
-   - 해결:
-     - Material Design 3 완전 적용
-     - 그라데이션 배경 및 카드 기반 레이아웃
-     - 한국어 설명 가독성 향상
-     - 직관적인 아이콘 및 버튼 디자인
-
-6. **네비게이션 문제**
-   - 문제: 이미지 답변 후 뒤로가기 버튼 동작 불안정
-   - 해결: 네비게이션 스택 관리 개선, Home 화면으로 안전한 복귀 로직 추가
-
-## 💎 창업/대회에서 어필할 가치
-
-### 1. 🌟 사회문제 해결성
-   - 다문화 격차 해소
-   - 부모 참여 향상
-   - 자녀 학업 지원
-
-### 2. 🤝 공공 협력 가능성
-   - 교육청/지원센터와 연계로 실제 학교에 도입 용이
-
-### 3. 💰 지속 가능성
-   - 부모·학교·정부 대상 유료화
-   - 공공기관 공급 모델 가능
-
-## 🔮 향후 계획
-
-1. **기능 확장**
-   - 더 많은 언어 지원
-   - 학습 데이터 분석 기능
-   - 게이미피케이션 시스템
-   - 가정통신문 자동 번역 기능
-
-2. **플랫폼 확장**
-   - iOS 버전 개발
-   - 웹 버전 개발
-
-3. **공공 협업**
-   - 교육부/지자체 협력
-   - 학교 현장 적용
-
-## 📦 설치 및 실행
-
-### 사전 요구사항
-- Android Studio Hedgehog 이상
-- JDK 8 이상
-- Android SDK 26 이상
-
-### 설정 방법
-1. 프로젝트 클론
-```bash
-git clone [repository-url]
-cd BilingualBuddy
+  AISvc -->|HTTPS| OpenAI[OpenAI API]
+  Trans -->|HTTPS| Papago[Papago API]
 ```
 
-2. API 키 설정 (선택사항)
-- **Mock 서비스 사용**: API 키 없이도 테스트 가능 (기본 설정)
-- **실제 API 사용**: `local.properties` 파일에 API 키 추가
+## 빠른 시작(Quick Start)
+
+### 요구사항
+
+- **Android Studio**: Hedgehog(2023.1.1) 이상 권장
+- **JDK**: 17 (Android Studio Embedded JDK 사용 가능)
+- **Android SDK**: compileSdk 34 / minSdk 26
+
+### 로컬 실행
+
+1) 레포 클론
+
+```bash
+git clone <REPO_URL>
+cd "BilingualBuddy"
+```
+
+2) Android Studio에서 프로젝트 열기 → Gradle Sync
+
+3) 에뮬레이터/실기기 선택 후 Run
+
+- 기본값은 **Mock 모드**입니다. (API 키 없이 동작)
+
+#### (선택) 실 API 모드로 실행
+
+- `local.properties`에 아래 키를 추가합니다. (`local.properties`는 git에 커밋되지 않습니다)
+
 ```properties
-OPENAI_API_KEY=your_api_key_here
-PAPAGO_CLIENT_ID=your_client_id_here
-PAPAGO_CLIENT_SECRET=your_client_secret_here
+OPENAI_API_KEY=sk_test_your_key
+PAPAGO_CLIENT_ID=naver_client_id
+PAPAGO_CLIENT_SECRET=naver_client_secret
 ```
-- 실제 API 사용 시 `AppModule.kt`에서 `MockAIService()`를 `OpenAiService()`로 변경
 
-3. 빌드 및 실행
+- `app/src/main/java/com/example/bilingualbuddy/di/AppModule.kt`에서 주입 대상을 변경합니다.
+  - 기본: `return MockAIService()`
+  - 실 API: `return OpenAiService()`
+
+### Docker 실행
+
+- 해당 없음 (Android 단일 앱 프로젝트)
+
+### 테스트(있을 때)
+
 ```bash
-./gradlew assembleDebug
+.\gradlew.bat test
 ```
 
-### 현재 상태
-- ✅ **Mock 서비스 활성화**: API 키 없이도 모든 기능 테스트 가능
-- ✅ **질문별 맞춤 답변**: 수학, 과학, 사회 등 다양한 질문 유형 지원
-- ✅ **완전한 UI**: 상용화 수준의 모던한 디자인 적용
+## 환경변수(.env.example)
 
-## 🏗️ 프로젝트 구조
+> 실제 프로젝트에서는 `local.properties`를 사용합니다. 아래는 **키 이름/의미/가짜 예시**만 정리한 표입니다.
+
+| 키 | 설명 | 예시(가짜 값) |
+|---|---|---|
+| `OPENAI_API_KEY` | OpenAI API 호출용(실 API 모드에서만 필요) | `sk_test_1234567890` |
+| `PAPAGO_CLIENT_ID` | Papago 번역 Client ID(선택) | `papago_client_id_test` |
+| `PAPAGO_CLIENT_SECRET` | Papago 번역 Client Secret(선택) | `papago_client_secret_test` |
+
+## 폴더 구조(간단)
 
 ```
 app/src/main/java/com/example/bilingualbuddy/
-├── api/                    # API 서비스 레이어
-├── data/
-│   └── repository/         # Repository 구현
-├── di/                     # Hilt 의존성 주입 모듈
-├── model/                  # 데이터 모델
-├── navigation/             # Navigation 그래프
-├── ui/
-│   ├── screen/            # Compose 화면
-│   ├── theme/             # Material Design 테마
-│   └── viewmodel/         # ViewModel
-└── util/                   # 유틸리티 클래스
+├── api/                # AI/번역 API, 서비스 인터페이스
+├── data/repository/    # Repository 구현
+├── di/                 # Hilt DI 모듈
+├── model/              # 데이터 모델
+├── navigation/         # Navigation
+├── ui/                 # 화면/테마/ViewModel
+└── util/               # OCR/TTS/Result 등 유틸
 ```
 
-## 🧪 테스트
+## 내 기여
 
-단위 테스트 실행:
-```bash
-./gradlew test
-```
+- **앱 전반 구현**: 질문 입력 → OCR → AI 호출/Mock → 결과 표시까지 end-to-end 플로우 구성
+- **아키텍처 정리**: MVVM + Repository + Hilt로 의존성/레이어 분리
+- **재현 가능성 확보**: `MockAIService` 기본 주입으로 API 키 없이도 화면/상태 전이 테스트 가능
+- **외부 API 연동**: OpenAI 호출/응답 파싱 및 HTTP 에러(401/403/429 등) 메시지 정리
+- **OCR 품질 개선**: ML Kit 한국어 인식 옵션 적용 및 빈 결과/예외 처리
+- **테스트 작성**: ViewModel/Repository 단위 테스트 추가
 
-## 📝 주요 개선사항 (2024)
+## 트러블슈팅/의사결정
 
-### 아키텍처 & 기술
-- ✅ MVVM 아키텍처 도입
-- ✅ Hilt 의존성 주입 적용
-- ✅ Repository 패턴 구현
-- ✅ Compose로 UI 통일
-- ✅ OCR 기능 구현 (ML Kit)
-- ✅ Papago API 연동
-- ✅ 강화된 에러 처리
-- ✅ API 키 보안 개선
-- ✅ 단위 테스트 추가
+- **API 키/크레딧/모델 접근 이슈** → UI 개발이 막히지 않도록 `MockAIService`로 의존성을 격리하고, DI에서 손쉽게 전환 가능하게 구성
+- **OCR 인식 품질/실패 케이스** → 한국어 인식 전용 옵션 사용 + 빈 결과/예외를 `Result`로 표준화해 사용자 메시지로 변환
+- **네비게이션/뒤로가기 안정성** → Navigation 스택을 명확히 하고, 결과 화면 이후 안전한 복귀 흐름을 정리
 
-### UI/UX 개선 (최신)
-- ✅ **전면적인 UI 리디자인**: 친숙하고 상용화된 느낌의 모던한 디자인
-- ✅ **Material Design 3**: 최신 디자인 시스템 완전 적용
-- ✅ **그라데이션 & 카드 디자인**: 시각적으로 매력적인 레이아웃
-- ✅ **한국어 설명 UI 개선**: 가독성 향상을 위한 구조화된 표시
-- ✅ **테스트 질문 태그**: 사용 편의성을 위한 예시 질문 제공
-- ✅ **직관적인 아이콘**: Material Icons Extended 활용
+## (부록) 면접 질문 5개 + 답변 초안
 
-### 기능 개선 (최신)
-- ✅ **Mock 서비스**: API 키 없이도 테스트 가능
-- ✅ **질문별 맞춤 답변**: 수학, 과학 등 유형별 맞춤 응답
-- ✅ **네비게이션 개선**: 뒤로가기 동작 최적화
+1) **Q. 왜 Mock 모드를 기본값으로 두었나요?**  
+   A. 외부 API 키/크레딧/네트워크에 막혀 개발/리뷰가 중단되는 걸 방지하려고, 핵심 UX 흐름은 항상 재현 가능하게 두었습니다.
 
-## 🎯 프로젝트 성과
+2) **Q. MVVM + Repository로 나눈 기준은 무엇인가요?**  
+   A. UI 상태/이벤트는 ViewModel에, 네트워크/OCR 같은 데이터 획득은 Repository/Service로 분리해 테스트와 교체(Mock↔실API)를 쉽게 만들었습니다.
 
-- 베트남어 사용자 대상 실험 진행
-- 번역 품질, 음성 정확도, UI 이해도 검증
-- 사용자 피드백 기반 개선 로드맵 수립
+3) **Q. OpenAI 응답을 어떻게 안정적으로 파싱하나요?**  
+   A. 응답을 3개 섹션(`[베트남어 요약]` 등)으로 강제하고 정규식으로 분리하며, 실패 시 빈 값/에러 메시지로 안전하게 처리합니다.
 
----
+4) **Q. OCR 실패/빈 결과를 UX에서 어떻게 다뤘나요?**  
+   A. 실패를 예외로 던지기보다 `Result.Error`로 통일하고, UI에서 즉시 재시도/입력 가이드를 제공할 수 있게 했습니다.
 
-*"BilingualBuddy는 단순한 번역 앱이 아닙니다. 아이의 언어, 부모의 언어, 그리고 학교의 언어를 이어주는 다리입니다."*
+5) **Q. 보안 관점에서 API 키는 어떻게 관리하나요?**  
+   A. 키는 소스에 하드코딩하지 않고 `local.properties`에서 `BuildConfig`로 주입하며, `local.properties`는 `.gitignore`로 커밋되지 않게 합니다.
